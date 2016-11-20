@@ -1,53 +1,39 @@
 package org.underpressureapps.unconflicto;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.Authenticator;
 import java.net.CookieHandler;
 import java.net.CookieManager;
-import java.net.CookieStore;
-import java.net.HttpCookie;
 import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import javax.net.ssl.HttpsURLConnection;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
+/*
+UnConflicto is an app to create schedule matrix for students of UniNorte. (And teachers I hope).
+Create by: Randy Consuegra (randyc@uninorte.edu.co);Carlos Diaz(caberrio@uninorte.edu.co)
+Fall 2016 (Colombian's Second Semester)
+*/
 public class MainActivity extends AppCompatActivity {
+    //We're using ButterKnife library to avoid findviewbyid
 
-    EditText usuario;
-    EditText pass;
+    @BindView(R.id.edusuario) EditText usuario;
+    @BindView(R.id.edcontraseña) EditText pass;
     public static String TAG = "AppFirebase";
     public static final String LOGIN_URL = "https://pomelo.uninorte.edu.co/pls/prod/twbkwbis.P_ValLogin";
 
@@ -56,17 +42,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        ButterKnife.bind(this);
     }
 
     CookieManager cookieManager = new CookieManager();
 
     public void onClickIniciar(View view) {
-        usuario   = (EditText)findViewById(R.id.edusuario);
-        pass      = (EditText)findViewById(R.id.edcontraseña);
+        /*usuario   = (EditText)findViewById(R.id.edusuario);
+        pass      = (EditText)findViewById(R.id.edcontraseña);*/
         final MainActivity context =  this;
 
-        Uri base_addres =Uri.parse("https://pomelo.uninorte.edu.co");
+        //Uri base_addres =Uri.parse("https://pomelo.uninorte.edu.co");
+
+        //Http login
         new Thread(new Runnable() {
             public void run() {
 
@@ -77,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
                 String user     =usuario.getText().toString();
                 String password =pass.getText().toString();
+                user="randyc";
+                password="270295randy";
                 //Save cokies
 
                 try {
@@ -84,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
+
                 HttpsURLConnection conn = null;
 
                 try {
@@ -92,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
+                //Protocols to get an answer from server.
                 try {
                     conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
                     conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:42.0) Gecko/20100101 Firefox/42.0");
@@ -106,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
+                //User Login
                 Uri.Builder builder = new Uri.Builder()
                         .appendQueryParameter("sid", user)
                         .appendQueryParameter("PIN", password);
@@ -113,52 +106,28 @@ public class MainActivity extends AppCompatActivity {
                 //System.out.println(query);
 
                 OutputStream os = null;
+                BufferedWriter writer = null;
+                InputStream in = null;
+
+
                 try {
                     os = conn.getOutputStream();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                BufferedWriter writer = null;
-
                     writer = new BufferedWriter(
                             new OutputStreamWriter(os));
-
-                try {
                     writer.write(query);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
                     writer.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
                     writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
                     os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                try {
                     conn.connect();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                InputStream in = null;
-                try {
                     in = conn.getInputStream();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
                 String encoding = conn.getContentEncoding();
                 encoding = encoding == null ? "UTF-8" : encoding;
                 String body = null;
+
                 try {
                     body = IOUtils.toString(in, encoding);
                 } catch (IOException e) {
@@ -166,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
 
-                if(!body.contains("Bienvenido")) {
+                if(body == null  || body.isEmpty()|| !body.contains("Bienvenido")) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -174,15 +143,16 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } else {
+                    //Get Student's name
+                    final String name =body.substring(body.indexOf("Bienvenido"),body.indexOf("Bienvenido")+40);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, "Bienvenido", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Bienvenido"+name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "), Toast.LENGTH_SHORT).show();
                             System.out.println(cookieManager.getCookieStore().getCookies().get(0).getValue());
                         }
                     });
                 }
-
                 //Log.d("Tag",body);
             }
         }).start();
