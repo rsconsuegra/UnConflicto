@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -23,6 +22,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Calendar;
+
 import javax.net.ssl.HttpsURLConnection;
 
 import butterknife.BindView;
@@ -48,6 +50,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
     }
+Calendar cal= Calendar.getInstance();
+   class ScheduleSubject
+    {
+        public String Name;
+        public String Professors;
+        public String NRC;
+        public ArrayList<Block> Blocks;
+    }
+
+    class Block
+    {
+        public String Day;
+        public String StartHour;
+        public String Duration;
+        public String StartDate;
+        public String EndDate;
+        public String Location;
+    }
+
 
     CookieManager cookieManager = new CookieManager();
 
@@ -201,6 +222,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    private ArrayList<ScheduleSubject> ParseSchedule (String html){
+
+
+        return null;
+    }
     private void sendPost() throws Exception {
 
         String url = "https://selfsolve.apple.com/wcResults.do";
