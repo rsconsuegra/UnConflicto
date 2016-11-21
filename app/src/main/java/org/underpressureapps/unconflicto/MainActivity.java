@@ -9,13 +9,17 @@ import android.widget.Toast;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -36,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.edcontraseña) EditText pass;
     public static String TAG = "AppFirebase";
     public static final String LOGIN_URL = "https://pomelo.uninorte.edu.co/pls/prod/twbkwbis.P_ValLogin";
-
+    private final String USER_AGENT = "Mozilla/5.0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,12 +153,93 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(MainActivity.this, "Bienvenido"+name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "), Toast.LENGTH_SHORT).show();
-                            System.out.println(cookieManager.getCookieStore().getCookies().get(0).getValue());
+                            System.out.println("Cookies are:"+cookieManager.getCookieStore().getCookies().toString());
                         }
                     });
                 }
+                try {
+                    sendGet();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 //Log.d("Tag",body);
+
             }
         }).start();
     }
+
+    private void sendGet() throws Exception {
+
+        String url = "https://pomelo.uninorte.edu.co/pls/prod/bwskfshd.P_CrseSchdDetl";
+
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        // optional default is GET
+        con.setRequestMethod("GET");
+
+        //add request header
+        con.setRequestProperty("User-Agent", USER_AGENT);
+
+        int responseCode = con.getResponseCode();
+        System.out.println("\nSending 'GET' request to URL : " + url);
+        System.out.println("Response Code : " + responseCode);
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        //print result
+        System.out.println(response.toString());
+
+    }
+
+    private void sendPost() throws Exception {
+
+        String url = "https://selfsolve.apple.com/wcResults.do";
+        URL obj = new URL(url);
+        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+
+        //add reuqest header
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", USER_AGENT);
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+        String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+
+        // Send post request
+        con.setDoOutput(true);
+        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+        wr.writeBytes(urlParameters);
+        wr.flush();
+        wr.close();
+
+        int responseCode = con.getResponseCode();
+        System.out.println("\nSending 'POST' request to URL : " + url);
+        System.out.println("Post parameters : " + urlParameters);
+        System.out.println("Response Code : " + responseCode);
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        //print result
+        System.out.println(response.toString());
+
+    }
+
+
 }
