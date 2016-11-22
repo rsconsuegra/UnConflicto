@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.StringBuilderWriter;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,7 +24,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -45,24 +44,6 @@ public class MainActivity extends AppCompatActivity {
     public static String TAG = "AppFirebase";
     public static final String LOGIN_URL = "https://pomelo.uninorte.edu.co/pls/prod/twbkwbis.P_ValLogin";
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:42.0) Gecko/20100101 Firefox/42.0";
-
-    class ScheduleSubject
-    {
-        public String Name;
-        public String Professors;
-        public String NRC;
-        public ArrayList<Block> Blocks;
-    }
-
-    class Block
-    {
-        public String Day;
-        public String StartHour;
-        public String Duration;
-        public String StartDate;
-        public String EndDate;
-        public String Location;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,11 +67,11 @@ public class MainActivity extends AppCompatActivity {
                 URL url = null;
                 CookieHandler.setDefault(cookieManager);
 
-                String user     =usuario.getText().toString();
-                String password =pass.getText().toString();
+                String user = usuario.getText().toString();
+                String password = pass.getText().toString();
                 user="randyc";
                 password="270295randy";
-                //Save cokies
+                //Save cookies
 
                 try {
                     url = new URL(LOGIN_URL);
@@ -182,18 +163,18 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    StringBuilder schedule=null;
+                    StringBuilder scheduleB=null;
 
                     try {
-                        schedule= sendPost();
-
+                    Schedule schedule = sendPost();
+                    Intent i = new Intent(MainActivity.this,LoginActivity.class);
+                    String var= scheduleB.toString();
+                    i.putExtra("Schedule ",schedule);
+                    startActivity(i);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    Intent i = new Intent(MainActivity.this,LoginActivity.class);
-                    String var= schedule.toString();
-                    i.putExtra("Horario ",var);
-                    startActivity(i);
+
                 }
 
                 //Log.d("Tag",body);
@@ -234,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private StringBuilder sendPost() throws Exception {
+    private Schedule sendPost() throws Exception {
 
         String url = "https://pomelo.uninorte.edu.co/pls/prod/bwskfshd.P_CrseSchdDetl";
         URL obj = new URL(url);
@@ -271,15 +252,21 @@ public class MainActivity extends AppCompatActivity {
         String inputLine;
 
         StringBuilder response = new StringBuilder();
-        boolean sw=false;
+        boolean sw = false;
 
         String word;
 
+        Block bloque = new Block();
+        List<Block> bloques = new ArrayList<Block>();
+
         String[] options={"Hora: ","Días: ","Dónde: ","Rango de Fecha: "};
         int i=0;
+        boolean primero = true;
         while ((inputLine = in.readLine()) != null) {
-
-            if (inputLine.toString().contains("Clase regular")){
+            if(!primero){
+                bloques.add(bloque);
+            }
+            if (inputLine.contains("Clase regular")){
                 sw = true;
                 continue;
             }
@@ -287,6 +274,7 @@ public class MainActivity extends AppCompatActivity {
             if(inputLine.contains("detalle de horario de curso")){
                 word=inputLine.substring(inputLine.lastIndexOf("\">")+2,inputLine.lastIndexOf("<"));
                 response.append("CURSO: "+word);
+                bloque.setCourseName(word);
                 System.out.println("CURSO: "+word);
             }
 
@@ -299,17 +287,32 @@ public class MainActivity extends AppCompatActivity {
                 word=inputLine.substring(inputLine.indexOf(">")+1,inputLine.lastIndexOf("<")).replace("&nbsp;","D");
                 response.append(options[i]+word);
                 System.out.println(options[i]+word);
+                switch (i){
+                    case 0:
+                        String[] hora = word.split(" - ");
+                        bloque.setStartHour(hora[0]);
+                        bloque.setEndHour(hora[1]);
+                        break;
+                    case 1:
+                        bloque.setDay(word);
+                        break;
+                    default:
+
+                        break;
+                }
                 i++;
             }
 
-
+            primero = false;
             /*response.append(inputLine);
             System.out.println(inputLine);*/
         }
         in.close();
-
+        Schedule schedulelist = new Schedule(bloques);
+        System.out.println(bloque.getStartHour());
+        System.out.println(bloque.getEndHour());
         //print result
         //System.out.println(response.toString());
-        return response;
+        return schedulelist;
     }
 }

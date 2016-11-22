@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         Intent i = getIntent();
-        String schedule = i.getStringExtra("Horario");
+        String schedule = i.getStringExtra("Schedule");
         ButterKnife.bind(this);
         text.setText(schedule);
     }
