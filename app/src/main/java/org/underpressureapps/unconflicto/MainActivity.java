@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                     Schedule schedule = sendPost();
                     Intent i = new Intent(MainActivity.this,LoginActivity.class);
                     //String var= scheduleB.toString();
-                    i.putExtra("Schedule ",schedule);
+                    i.putExtra("Schedule",schedule);
                     startActivity(i);
                     } catch (Exception e) {
                         e.printStackTrace();

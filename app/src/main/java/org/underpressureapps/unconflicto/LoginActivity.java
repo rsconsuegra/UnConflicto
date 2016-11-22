@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         Intent i = getIntent();
         Schedule schedule = (Schedule) i.getSerializableExtra("Schedule");
         ButterKnife.bind(this);
-        //text.setText(schedule.getBlock(1).getCourseName().toString());
+        text.setText(schedule.getBlock(1).getCourseName().toString());
     }
 
     public void onClickIngreso(View view) {
