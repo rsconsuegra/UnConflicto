@@ -1,5 +1,6 @@
 package org.underpressureapps.unconflicto;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.StringBuilderWriter;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -42,16 +44,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.edcontraseña) EditText pass;
     public static String TAG = "AppFirebase";
     public static final String LOGIN_URL = "https://pomelo.uninorte.edu.co/pls/prod/twbkwbis.P_ValLogin";
-    private final String USER_AGENT = "Mozilla/5.0";
+    private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:42.0) Gecko/20100101 Firefox/42.0";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-    }
-
-   class ScheduleSubject
+    class ScheduleSubject
     {
         public String Name;
         public String Professors;
@@ -69,6 +64,12 @@ public class MainActivity extends AppCompatActivity {
         public String Location;
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+    }
 
     CookieManager cookieManager = new CookieManager();
 
@@ -82,10 +83,8 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             public void run() {
 
-
                 URL url = null;
                 CookieHandler.setDefault(cookieManager);
-
 
                 String user     =usuario.getText().toString();
                 String password =pass.getText().toString();
@@ -110,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 //Protocols to get an answer from server.
                 try {
                     conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-                    conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:42.0) Gecko/20100101 Firefox/42.0");
+                    conn.setRequestProperty("User-Agent", USER_AGENT);
                     conn.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
                     conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
                     conn.setRequestProperty("Connection", "keep-alive");
@@ -129,8 +128,8 @@ public class MainActivity extends AppCompatActivity {
                 String query = builder.build().getEncodedQuery();
                 //System.out.println(query);
 
-                OutputStream os = null;
-                BufferedWriter writer = null;
+                OutputStream os;
+                BufferedWriter writer;
                 InputStream in = null;
 
 
@@ -173,22 +172,28 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(MainActivity.this, "Bienvenido"+name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "), Toast.LENGTH_SHORT).show();
-                            System.out.println("Cookies are:"+cookieManager.getCookieStore().getCookies().toString());
+                            //System.out.println("Cookies are:"+cookieManager.getCookieStore().getCookies().toString());
+
                         }
                     });
-                }
+                    try {
+                        sendGet();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
+                    StringBuilder schedule=null;
 
-                try {
-                    sendGet();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    try {
+                        schedule= sendPost();
 
-                try {
-                    sendPost();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    Intent i = new Intent(MainActivity.this,LoginActivity.class);
+                    String var= schedule.toString();
+                    i.putExtra("Horario ",var);
+                    startActivity(i);
                 }
 
                 //Log.d("Tag",body);
@@ -229,15 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    private ArrayList<ScheduleSubject> ParseSchedule (String html){
-
-
-        return null;
-    }
-
-
-    private void sendPost() throws Exception {
+    private StringBuilder sendPost() throws Exception {
 
         String url = "https://pomelo.uninorte.edu.co/pls/prod/bwskfshd.P_CrseSchdDetl";
         URL obj = new URL(url);
@@ -245,13 +242,12 @@ public class MainActivity extends AppCompatActivity {
 
         //add reuqest header
         con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:42.0) Gecko/20100101 Firefox/42.0");
+        con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
         con.setRequestProperty("Accept-Encoding", "gzip, deflate");
         con.setRequestProperty("Connection", "keep-alive");
         con.setRequestMethod("POST");
 
-        //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
 
         Uri.Builder builder = new Uri.Builder()
                 .appendQueryParameter("term_in", "201630");
@@ -273,18 +269,47 @@ public class MainActivity extends AppCompatActivity {
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuilder response = new StringBuilder();
 
+        StringBuilder response = new StringBuilder();
+        boolean sw=false;
+
+        String word;
+
+        String[] options={"Hora: ","Días: ","Dónde: ","Rango de Fecha: "};
+        int i=0;
         while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-            System.out.println(inputLine);
+
+            if (inputLine.toString().contains("Clase regular")){
+                sw = true;
+                continue;
+            }
+
+            if(inputLine.contains("detalle de horario de curso")){
+                word=inputLine.substring(inputLine.lastIndexOf("\">")+2,inputLine.lastIndexOf("<"));
+                response.append("CURSO: "+word);
+                System.out.println("CURSO: "+word);
+            }
+
+            if(sw){
+                if(inputLine.contains("Teoría") || inputLine.contains("Conferencia") || inputLine.contains("Práctica Dirigida")|| inputLine.contains("Laboratorio") /*inputLine.contains("</TR>")*/){
+                    sw=false;
+                    i=0;
+                    continue;
+                }
+                word=inputLine.substring(inputLine.indexOf(">")+1,inputLine.lastIndexOf("<")).replace("&nbsp;","D");
+                response.append(options[i]+word);
+                System.out.println(options[i]+word);
+                i++;
+            }
+
+
+            /*response.append(inputLine);
+            System.out.println(inputLine);*/
         }
         in.close();
 
         //print result
         //System.out.println(response.toString());
-
+        return response;
     }
-
-
 }

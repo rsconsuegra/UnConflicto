@@ -1,9 +1,11 @@
 package org.underpressureapps.unconflicto;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -19,48 +21,25 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class LoginActivity extends AppCompatActivity {
 
-    public static final String LOGIN_URL = "https://pomelo.uninorte.edu.co/pls/prod/twbkwbis.P_ValLogin";
+
+    @BindView(R.id.tv) TextView text;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        Intent i = getIntent();
+        String schedule = i.getStringExtra("Horario");
+        ButterKnife.bind(this);
+        text.setText(schedule);
     }
 
     public void onClickIngreso(View view) {
-        // Creating HTTP client
-        HttpClient httpClient = new DefaultHttpClient();
-
-        // Creating HTTP Post
-        HttpPost httpPost = new HttpPost(LOGIN_URL);
-
-        List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(2);
-        nameValuePair.add(new BasicNameValuePair("sid", "randyc"));
-        nameValuePair.add(new BasicNameValuePair("PIN", "270295randy"));
-
-        try {
-            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePair));
-        }
-        catch (UnsupportedEncodingException e) {
-            // writing error to Log
-            e.printStackTrace();
-        }
-
-        try {
-            HttpResponse response = httpClient.execute(httpPost);
-
-            // writing response to log
-            Log.d("Http Response:", response.toString());
-
-        } catch (ClientProtocolException e) {
-            // writing exception to log
-            e.printStackTrace();
-
-        } catch (IOException e) {
-            // writing exception to log
-            e.printStackTrace();
-        }
 
     }
 }
