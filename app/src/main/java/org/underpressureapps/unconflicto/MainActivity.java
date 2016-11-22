@@ -163,12 +163,13 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    StringBuilder scheduleB=null;
+                    //StringBuilder scheduleB=null;
+
 
                     try {
                     Schedule schedule = sendPost();
                     Intent i = new Intent(MainActivity.this,LoginActivity.class);
-                    String var= scheduleB.toString();
+                    //String var= scheduleB.toString();
                     i.putExtra("Schedule ",schedule);
                     startActivity(i);
                     } catch (Exception e) {
@@ -261,11 +262,9 @@ public class MainActivity extends AppCompatActivity {
 
         String[] options={"Hora: ","Días: ","Dónde: ","Rango de Fecha: "};
         int i=0;
-        boolean primero = true;
+
         while ((inputLine = in.readLine()) != null) {
-            if(!primero){
-                bloques.add(bloque);
-            }
+
             if (inputLine.contains("Clase regular")){
                 sw = true;
                 continue;
@@ -276,17 +275,19 @@ public class MainActivity extends AppCompatActivity {
                 response.append("CURSO: "+word);
                 bloque.setCourseName(word);
                 System.out.println("CURSO: "+word);
+                continue;
             }
 
             if(sw){
-                if(inputLine.contains("Teoría") || inputLine.contains("Conferencia") || inputLine.contains("Práctica Dirigida")|| inputLine.contains("Laboratorio") /*inputLine.contains("</TR>")*/){
-                    sw=false;
+               if(inputLine.contains("Teoría") || inputLine.contains("Conferencia") || inputLine.contains("Práctica Dirigida")|| inputLine.contains("Laboratorio") /*inputLine.contains("</TR>")*/){
+                   sw=false;
                     i=0;
                     continue;
                 }
                 word=inputLine.substring(inputLine.indexOf(">")+1,inputLine.lastIndexOf("<")).replace("&nbsp;","D");
                 response.append(options[i]+word);
                 System.out.println(options[i]+word);
+
                 switch (i){
                     case 0:
                         String[] hora = word.split(" - ");
@@ -295,15 +296,15 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 1:
                         bloque.setDay(word);
-                        break;
-                    default:
-
+                        if(bloque.getCourseName() == null)
+                            bloque.setCourseName(bloques.get(bloques.size()-1).getCourseName());
+                        bloques.add(bloque);
+                        bloque= new Block();
                         break;
                 }
                 i++;
             }
 
-            primero = false;
             /*response.append(inputLine);
             System.out.println(inputLine);*/
         }

@@ -19,7 +19,7 @@ public class Schedule implements Serializable{
     }
 }
 
-class Block
+class Block implements Serializable
 {
     public String CourseName;
     public String Day;
