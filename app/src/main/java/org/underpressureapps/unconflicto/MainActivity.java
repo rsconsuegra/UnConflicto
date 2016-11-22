@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
     }
-Calendar cal= Calendar.getInstance();
+
    class ScheduleSubject
     {
         public String Name;
@@ -75,7 +75,6 @@ Calendar cal= Calendar.getInstance();
     public void onClickIniciar(View view) {
         /*usuario   = (EditText)findViewById(R.id.edusuario);
         pass      = (EditText)findViewById(R.id.edcontraseña);*/
-        final MainActivity context =  this;
 
         //Uri base_addres =Uri.parse("https://pomelo.uninorte.edu.co");
 
@@ -178,8 +177,16 @@ Calendar cal= Calendar.getInstance();
                         }
                     });
                 }
+
+
                 try {
                     sendGet();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    sendPost();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -210,7 +217,7 @@ Calendar cal= Calendar.getInstance();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -228,43 +235,54 @@ Calendar cal= Calendar.getInstance();
 
         return null;
     }
+
+
     private void sendPost() throws Exception {
 
-        String url = "https://selfsolve.apple.com/wcResults.do";
+        String url = "https://pomelo.uninorte.edu.co/pls/prod/bwskfshd.P_CrseSchdDetl";
         URL obj = new URL(url);
         HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
         //add reuqest header
-        con.setRequestMethod("POST");
-        con.setRequestProperty("User-Agent", USER_AGENT);
+        con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:42.0) Gecko/20100101 Firefox/42.0");
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setRequestProperty("Accept-Encoding", "gzip, deflate");
+        con.setRequestProperty("Connection", "keep-alive");
+        con.setRequestMethod("POST");
 
-        String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+        //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+
+        Uri.Builder builder = new Uri.Builder()
+                .appendQueryParameter("term_in", "201630");
+        String query = builder.build().getEncodedQuery();
+
 
         // Send post request
         con.setDoOutput(true);
         DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(urlParameters);
+        wr.writeBytes(query);
         wr.flush();
         wr.close();
 
         int responseCode = con.getResponseCode();
         System.out.println("\nSending 'POST' request to URL : " + url);
-        System.out.println("Post parameters : " + urlParameters);
+        //System.out.println("Post parameters : " + urlParameters);
         System.out.println("Response Code : " + responseCode);
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
+            System.out.println(inputLine);
         }
         in.close();
 
         //print result
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
 
     }
 
