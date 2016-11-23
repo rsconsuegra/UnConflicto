@@ -10,6 +10,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import org.apache.commons.io.IOUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -28,7 +32,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -39,6 +42,11 @@ Fall 2016 (Colombian's Second Semester)
 */
 public class MainActivity extends AppCompatActivity {
     //We're using ButterKnife library to avoid findviewbyid
+
+
+    private DatabaseReference mDatabase;
+// ...
+    mDatabase = FirebaseDatabase.getInstance().getReference();
 
     @BindView(R.id.edusuario) EditText usuario;
     @BindView(R.id.edcontraseña) EditText pass;
@@ -182,8 +190,19 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println(codigo);
                     try {
                     Schedule schedule = sendPost();
+
+                    ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                    String json = ow.writeValueAsString(schedule);
+                    System.out.println(json);
+                  /*      DatabaseReference nuevoMensaje = mesajeRef.push();
+                        nuevoMensaje.child("descripcion").setValue(descripcion.getText().toString());
+                        nuevoMensaje.child("hora").setValue(horas);
+                        nuevoMensaje.child("imagen").setValue(textofot);
+                        nuevoMensaje.child("lugar").setValue(spinner.getSelectedItem().toString());*/
+
                     Intent i = new Intent(MainActivity.this,LoginActivity.class);
                     i.putExtra("Schedule",schedule);
+                    i.putExtra("Codigo",codigo);
                     startActivity(i);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -326,9 +345,6 @@ public class MainActivity extends AppCompatActivity {
         }
         in.close();
         Schedule schedulelist = new Schedule(bloques);
-        System.out.println(bloque.getStartHour());
-        System.out.println(bloque.getEndHour());
-
         //print result
         //System.out.println(response.toString());
 
