@@ -1,6 +1,9 @@
 package org.underpressureapps.unconflicto;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import org.apache.commons.io.IOUtils;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -25,7 +27,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.net.ssl.HttpsURLConnection;
 
 import butterknife.BindView;
@@ -58,11 +59,19 @@ public class MainActivity extends AppCompatActivity {
         /*usuario   = (EditText)findViewById(R.id.edusuario);
         pass      = (EditText)findViewById(R.id.edcontraseña);*/
 
+
+
         //Uri base_addres =Uri.parse("https://pomelo.uninorte.edu.co");
 
         //Http login
         new Thread(new Runnable() {
             public void run() {
+
+                boolean onLine = hasActiveInternetConnection(MainActivity.this.getApplicationContext());
+
+                if (onLine==false){
+                    return;
+                }
 
                 URL url = null;
                 CookieHandler.setDefault(cookieManager);
@@ -73,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 password="270295randy";
                 //Save cookies
 
+                // Here goes de first POST to do a login in POMELO (Aurora)
                 try {
                     url = new URL(LOGIN_URL);
                 } catch (MalformedURLException e) {
@@ -99,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
                 } catch (ProtocolException e) {
                     e.printStackTrace();
                 }
+                //
+
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
@@ -107,12 +119,11 @@ public class MainActivity extends AppCompatActivity {
                         .appendQueryParameter("sid", user)
                         .appendQueryParameter("PIN", password);
                 String query = builder.build().getEncodedQuery();
-                //System.out.println(query);
 
+                //Connection
                 OutputStream os;
                 BufferedWriter writer;
                 InputStream in = null;
-
 
                 try {
                     os = conn.getOutputStream();
@@ -127,6 +138,13 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                //Conn ends.
+
+                try {
+                    System.out.println(conn.getResponseCode());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 String encoding = conn.getContentEncoding();
                 encoding = encoding == null ? "UTF-8" : encoding;
@@ -137,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
+                //Here Ends POST
 
                 if(body == null  || body.isEmpty()|| !body.contains("Bienvenido")) {
                     runOnUiThread(new Runnable() {
@@ -153,38 +171,30 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(MainActivity.this, "Bienvenido"+name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "), Toast.LENGTH_SHORT).show();
-                            //System.out.println("Cookies are:"+cookieManager.getCookieStore().getCookies().toString());
-
                         }
                     });
+                    String codigo="";
                     try {
-                        sendGet();
+                        codigo=sendGet(name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
-                    //StringBuilder scheduleB=null;
-
-
+                    System.out.println(codigo);
                     try {
                     Schedule schedule = sendPost();
                     Intent i = new Intent(MainActivity.this,LoginActivity.class);
-                    //String var= scheduleB.toString();
                     i.putExtra("Schedule",schedule);
                     startActivity(i);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
                 }
-
-                //Log.d("Tag",body);
 
             }
         }).start();
     }
 
-    private void sendGet() throws Exception {
+    private String sendGet(String name) throws Exception {
 
         String url = "https://pomelo.uninorte.edu.co/pls/prod/bwskfshd.P_CrseSchdDetl";
 
@@ -206,7 +216,13 @@ public class MainActivity extends AppCompatActivity {
         String inputLine;
         StringBuilder response = new StringBuilder();
 
+        String codigo="";
         while ((inputLine = in.readLine()) != null) {
+
+            if(inputLine.contains(name)){
+                codigo=inputLine.substring(inputLine.indexOf("\">2")+1,inputLine.lastIndexOf(name));
+                continue;
+            }
             response.append(inputLine);
         }
         in.close();
@@ -214,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
         //print result
         System.out.println(response.toString());
 
+        return codigo;
     }
 
     private Schedule sendPost() throws Exception {
@@ -264,7 +281,6 @@ public class MainActivity extends AppCompatActivity {
         int i=0;
 
         while ((inputLine = in.readLine()) != null) {
-
             if (inputLine.contains("Clase regular")){
                 sw = true;
                 continue;
@@ -312,8 +328,47 @@ public class MainActivity extends AppCompatActivity {
         Schedule schedulelist = new Schedule(bloques);
         System.out.println(bloque.getStartHour());
         System.out.println(bloque.getEndHour());
+
         //print result
         //System.out.println(response.toString());
+
         return schedulelist;
+    }
+
+    // isNetworkAvailabe and hasActiveInternetConnection checks internet if there's an internet connection available and stable.
+
+    private boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
+    }
+
+    public  boolean hasActiveInternetConnection(Context context) {
+        if (isNetworkAvailable(context)) {
+            try {
+                HttpURLConnection urlc = (HttpURLConnection) (new URL("http://www.google.com").openConnection());
+                urlc.setRequestProperty("User-Agent", "Test");
+                urlc.setRequestProperty("Connection", "close");
+                urlc.setConnectTimeout(1000);
+                urlc.connect();
+                return (urlc.getResponseCode() == 200);
+            } catch (IOException e) {
+                /*http://stackoverflow.com/questions/10242351/display-an-alert-when-internet-connection-not-available-in-android-application*/
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                Toast.makeText(MainActivity.this, "Error checking internet connection", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } else {
+
+            runOnUiThread(new Runnable() {
+                public void run() {
+            Toast.makeText(MainActivity.this, "No network available!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        return false;
     }
 }
