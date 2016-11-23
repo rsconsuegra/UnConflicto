@@ -44,9 +44,9 @@ public class MainActivity extends AppCompatActivity {
     //We're using ButterKnife library to avoid findviewbyid
 
 
-    private DatabaseReference mDatabase;
+   // private DatabaseReference mDatabase;
 // ...
-    mDatabase = FirebaseDatabase.getInstance().getReference();
+    //mDatabase = FirebaseDatabase.getInstance().getReference();
 
     @BindView(R.id.edusuario) EditText usuario;
     @BindView(R.id.edcontraseña) EditText pass;
