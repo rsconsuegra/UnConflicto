@@ -15,8 +15,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -32,7 +37,11 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
 import javax.net.ssl.HttpsURLConnection;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     //We're using ButterKnife library to avoid findviewbyid
 
 
-    public DatabaseReference codo = FirebaseDatabase.getInstance().getReference().getRoot();
+    private DatabaseReference database =FirebaseDatabase.getInstance().getReference();
 
 // ...
     //mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -191,22 +200,32 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     System.out.println(codigo);
+
+                    DatabaseReference mesajeRef = database.child(codigo);
                     try {
-                    Schedule schedule = sendPost();
+                        Schedule schedule = sendPost();
 
-                    ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                    String json = ow.writeValueAsString(schedule);
-                    System.out.println(json);
-                  /*      DatabaseReference nuevoMensaje = mesajeRef.push();
-                        nuevoMensaje.child("descripcion").setValue(descripcion.getText().toString());
-                        nuevoMensaje.child("hora").setValue(horas);
-                        nuevoMensaje.child("imagen").setValue(textofot);
-                        nuevoMensaje.child("lugar").setValue(spinner.getSelectedItem().toString());*/
+                        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                        String json = ow.writeValueAsString(schedule);
+                        System.out.println(json);
 
-                    Intent i = new Intent(MainActivity.this,LoginActivity.class);
-                    i.putExtra("Schedule",schedule);
-                    i.putExtra("Codigo",codigo);
-                    startActivity(i);
+                        JSONObject obj=null;
+                        try {
+                            obj = new JSONObject(json);
+                            System.out.println("My App"+obj.toString());
+                        } catch (Throwable t) {
+                            System.out.println("My App"+"Could not parse malformed JSON: \"" + json + "\"");
+                        }
+
+
+                        Map<String, Object> map =jsonToMap(obj);
+                        mesajeRef.setValue(map);
+
+
+                        Intent i = new Intent(MainActivity.this,LoginActivity.class);
+                        i.putExtra("Schedule",schedule);
+                        i.putExtra("Codigo",codigo);
+                        startActivity(i);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -250,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
         in.close();
 
         //print result
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
 
         return codigo;
     }
@@ -389,5 +408,52 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         return false;
+    }
+
+    //Convert object to JSON and JSON to map
+
+    public static Map<String, Object> jsonToMap(JSONObject json) throws JSONException {
+        Map<String, Object> retMap = new HashMap<String, Object>();
+
+        if(json != JSONObject.NULL) {
+            retMap = toMap(json);
+        }
+        return retMap;
+    }
+
+    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            Object value = object.get(key);
+
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public static List<Object> toList(JSONArray array) throws JSONException {
+        List<Object> list = new ArrayList<Object>();
+        for(int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }
+        return list;
     }
 }
