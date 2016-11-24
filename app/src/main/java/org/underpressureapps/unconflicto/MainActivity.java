@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-//import com.google.gson.Gson;
+import com.google.gson.Gson;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -203,12 +203,14 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println(codigo);
 
                     /*Acá debería Averiguar si el usuario ya existe.
-                    * http://stackoverflow.com/questions/37405149/how-do-i-check-if-a-firebase-database-value-exists
                     * */
 
-                    DatabaseReference messageRef= databaseInstance.getReference("users/" + codigo + "");
-                    messageRef.child("uni_code").setValue(codigo);
-                    messageRef.child("name").setValue(name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "));
+                    DatabaseReference userRef= databaseInstance.getReference("users/" + codigo + "");
+                    DatabaseReference scheduleRef= databaseInstance.getReference("schedules/" + codigo + "");
+
+                    userRef.child("uni_code").setValue(codigo);
+                    scheduleRef.child("owner").setValue(codigo);
+                    userRef.child("name").setValue(name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "));
                     //DatabaseReference mesajeRef = database.child(codigo);
 
 
@@ -236,7 +238,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                         Map<String, Object> map =jsonToMap(obj);
-                        messageRef.child("schedule").setValue(map);
+                        userRef.child("schedule").setValue(map);
+                        scheduleRef.child("schedule").setValue(map);
 
 
                         Intent i = new Intent(MainActivity.this,RecyclerActivity.class);

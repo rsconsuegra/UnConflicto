@@ -6,8 +6,8 @@ import java.util.List;
 public class Schedule implements Serializable{
     List<Block> Blocks;
 
-    public Schedule(List<Block> blocks) {
-        Blocks = blocks;
+    public Schedule(List<Block> Blocks) {
+        this.Blocks = Blocks;
     }
 
     public Block getBlock(int i) {
@@ -19,8 +19,8 @@ public class Schedule implements Serializable{
     }
 }
 
-class Block implements Serializable
-{
+class Block implements Serializable{
+
     public String CourseName;
     public String Day;
     public String StartHour;
