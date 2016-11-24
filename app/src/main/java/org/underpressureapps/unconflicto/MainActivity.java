@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                 } else {
                     //Get Student's name
-                    final String name =body.substring(body.indexOf("Bienvenido"),body.indexOf("Bienvenido")+40);
+                    final String name =body.substring(body.indexOf("Bienvenido"),body.indexOf("Bienvenido")+140);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
