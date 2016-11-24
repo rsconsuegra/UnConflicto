@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference database =FirebaseDatabase.getInstance().getReference();
 
 // ...
-    //mDatabase = FirebaseDatabase.getInstance().getReference();
+    FirebaseDatabase databaseInstance = FirebaseDatabase.getInstance();
 
     @BindView(R.id.edusuario) EditText usuario;
     @BindView(R.id.edcontraseña) EditText pass;
@@ -201,9 +201,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                     System.out.println(codigo);
 
-                    DatabaseReference mesajeRef = database.child(codigo);
+                    /*Acá debería Averiguar si el usuario ya existe.
+                    * http://stackoverflow.com/questions/37405149/how-do-i-check-if-a-firebase-database-value-exists
+                    * */
 
-                    /*Acá debería Averiguar si el usuario ya existe.*/
+                    DatabaseReference messageRef= databaseInstance.getReference("users/" + codigo + "");
+                    messageRef.child("uni_code").setValue(codigo);
+                    messageRef.child("name").setValue(name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "));
+                    //DatabaseReference mesajeRef = database.child(codigo);
+
 
                     try {
                         Schedule schedule = sendPost();
@@ -222,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                         Map<String, Object> map =jsonToMap(obj);
-                        mesajeRef.setValue(map);
+                        messageRef.child("schedule").setValue(map);
 
 
                         Intent i = new Intent(MainActivity.this,RecyclerActivity.class);
