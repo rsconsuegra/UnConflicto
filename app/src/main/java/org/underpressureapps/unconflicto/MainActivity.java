@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.firebase.database.DatabaseReference;
@@ -214,7 +215,14 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         Schedule schedule = sendPost();
 
-                        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                        //ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                        ObjectMapper mapper  = new ObjectMapper();
+                        mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+                        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
                         String json = ow.writeValueAsString(schedule);
                         System.out.println(json);
 
