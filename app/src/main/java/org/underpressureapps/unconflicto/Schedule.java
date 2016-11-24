@@ -41,31 +41,37 @@ class Block implements Serializable{
         return CourseName;
     }
 
-    public void setCourseName(String courseName) {
+    public void sCourseName(String courseName) {
         CourseName = courseName;
+    }
+
+    public void sDay(String day) {
+        Day = day;
+    }
+
+    public void sStartHour(String startHour) {
+        StartHour = startHour;
+    }
+
+    public void sEndHour(String endHour) {
+        EndHour = endHour;
     }
 
     public String getDay() {
         return Day;
     }
 
-    public void setDay(String day) {
-        Day = day;
-    }
+
 
     public String getEndHour() {
         return EndHour;
     }
 
-    public void setEndHour(String endHour) {
-        EndHour = endHour;
-    }
+
 
     public String getStartHour() {
         return StartHour;
     }
 
-    public void setStartHour(String startHour) {
-        StartHour = startHour;
-    }
+
 }

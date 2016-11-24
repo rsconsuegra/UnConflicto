@@ -30,6 +30,8 @@
         </activity>
         <activity android:name=".RecyclerActivity"></activity>
         <activity android:name=".AddUserToGroup"></activity>
+        <activity android:name=".GroupsList"></activity>
+        <activity android:name=".MySchedule"></activity>
     </application>
 
 </manifest>

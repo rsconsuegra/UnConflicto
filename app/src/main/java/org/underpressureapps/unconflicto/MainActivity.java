@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                         scheduleRef.child("schedule").setValue(map);
 
 
-                        Intent i = new Intent(MainActivity.this,AddUserToGroup.class);
+                        Intent i = new Intent(MainActivity.this,MySchedule.class);
                         i.putExtra("Codigo",codigo);
                         startActivity(i);
                     } catch (Exception e) {
@@ -386,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
             if(inputLine.contains("detalle de horario de curso")){
                 word=inputLine.substring(inputLine.lastIndexOf("\">")+2,inputLine.lastIndexOf("<"));
                 response.append("CURSO: "+word);
-                bloque.setCourseName(word);
+                //bloque.setCourseName(word);
                 System.out.println("CURSO: "+word);
                 continue;
             }
@@ -404,13 +404,13 @@ public class MainActivity extends AppCompatActivity {
                 switch (i){
                     case 0:
                         String[] hora = word.split(" - ");
-                        bloque.setStartHour(hora[0]);
-                        bloque.setEndHour(hora[1]);
+                        bloque.sStartHour(hora[0]);
+                        bloque.sEndHour(hora[1]);
                         break;
                     case 1:
-                        bloque.setDay(word);
+                        bloque.sDay(word);
                         if(bloque.getCourseName() == null)
-                            bloque.setCourseName(bloques.get(bloques.size()-1).getCourseName());
+                            bloque.sCourseName(bloques.get(bloques.size()-1).getCourseName());
                         bloques.add(bloque);
                         bloque= new Block();
                         break;

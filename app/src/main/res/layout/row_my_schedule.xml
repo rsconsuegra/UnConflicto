@@ -16,7 +16,7 @@
             android:layout_margin="16dp"
             android:paddingLeft="44dp"
             android:layout_gravity="center"
-            android:id="@+id/textViewDia"
+            android:id="@+id/tvDia"
             android:textStyle="normal|bold"
             android:textSize="18sp"
             android:textAlignment="center"
@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:id="@+id/textViewHora"
+        android:id="@+id/tvHora"
         android:textAlignment="center" />
 
     <View
