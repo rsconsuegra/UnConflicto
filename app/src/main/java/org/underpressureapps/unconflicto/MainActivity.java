@@ -102,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
 
                 String user = usuario.getText().toString();
                 String password = pass.getText().toString();
-                user="caberrio";
-                password="0r4lb30r4lb3";
+                //user="caberrio";
+                //password="0r4lb30r4lb3";
                 //Save cookies
 
                 // Here goes de first POST to do a login in POMELO (Aurora)
