@@ -14,8 +14,11 @@ import android.widget.Toast;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import org.apache.commons.io.IOUtils;
@@ -204,6 +207,40 @@ public class MainActivity extends AppCompatActivity {
 
                     /*Acá debería Averiguar si el usuario ya existe.
                     * */
+
+
+                    DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+
+                        /*final String finalCodigo = codigo;
+                        rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot snapshot) {
+                                if (snapshot.hasChild(finalCodigo)) {
+                                    System.out.println("User is in database");
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });*/
+
+
+                    final String finalCodigo = codigo;
+                    rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            System.out.println("-------------IT'S ALIVE-------------.");
+                            if (dataSnapshot.child("users").child(finalCodigo).getValue() != null) {
+                                System.out.println("Existe el vale");
+                            }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
 
                     DatabaseReference userRef= databaseInstance.getReference("users/" + codigo + "");
                     DatabaseReference scheduleRef= databaseInstance.getReference("schedules/" + codigo + "");
