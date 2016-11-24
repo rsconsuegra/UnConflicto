@@ -103,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
 
                 String user = usuario.getText().toString();
                 String password = pass.getText().toString();
-                user="randyc";
-                password="270295randy";
+                user="racedo";
+                password="sejorava123";
                 //Save cookies
 
                 // Here goes de first POST to do a login in POMELO (Aurora)
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                 } else {
                     //Get Student's name
-                    final String name =body.substring(body.indexOf("Bienvenido"),body.indexOf("Bienvenido")+140);
+                    final String name =body.substring(body.indexOf("Bienvenido"),body.indexOf("Bienvenido")+80);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
