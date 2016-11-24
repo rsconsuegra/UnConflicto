@@ -202,6 +202,9 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println(codigo);
 
                     DatabaseReference mesajeRef = database.child(codigo);
+
+                    /*Acá debería Averiguar si el usuario ya existe.*/
+
                     try {
                         Schedule schedule = sendPost();
 
@@ -222,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                         mesajeRef.setValue(map);
 
 
-                        Intent i = new Intent(MainActivity.this,LoginActivity.class);
+                        Intent i = new Intent(MainActivity.this,RecyclerActivity.class);
                         i.putExtra("Schedule",schedule);
                         i.putExtra("Codigo",codigo);
                         startActivity(i);
