@@ -15,7 +15,6 @@ public class RecyclerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recycler);
 
         Intent i = getIntent();
-        Schedule schedule = (Schedule) i.getSerializableExtra("Schedule");
         String codigo = i.getStringExtra("Codigo");
     }
 }
