@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
 
 // ...
     FirebaseDatabase databaseInstance = FirebaseDatabase.getInstance();
-    public boolean userexistsw=false;
 
     @BindView(R.id.edusuario) EditText usuario;
     @BindView(R.id.edcontraseña) EditText pass;
@@ -103,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
 
                 String user = usuario.getText().toString();
                 String password = pass.getText().toString();
-                user="racedo";
-                password="sejorava123";
+                user="caberrio";
+                password="0r4lb30r4lb3";
                 //Save cookies
 
                 // Here goes de first POST to do a login in POMELO (Aurora)
@@ -206,18 +205,35 @@ public class MainActivity extends AppCompatActivity {
                     }
                     System.out.println(codigo);
 
-                    //DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+                    /*Acá debería Averiguar si el usuario ya existe.
+                    * */
+
+
+                    DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+
+                        /*final String finalCodigo = codigo;
+                        rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot snapshot) {
+                                if (snapshot.hasChild(finalCodigo)) {
+                                    System.out.println("User is in database");
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });*/
+
 
                     final String finalCodigo = codigo;
-                    database.addListenerForSingleValueEvent(new ValueEventListener() {
+                    rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            //System.out.println("-------------IT'S ALIVE-------------.");
+                            System.out.println("-------------IT'S ALIVE-------------.");
                             if (dataSnapshot.child("users").child(finalCodigo).getValue() != null) {
-                                System.out.println("--------El Codigo del estudiante ya se encuentra en la Base de Datos--------");
-                                userexistsw=true;
-                            }else{
-                                System.out.println("---HELLO---");
+                                System.out.println("Existe el vale");
                             }
                         }
                         @Override
@@ -226,18 +242,49 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
+                    DatabaseReference userRef= databaseInstance.getReference("users/" + codigo + "");
+                    DatabaseReference scheduleRef= databaseInstance.getReference("schedules/" + codigo + "");
+
+                    userRef.child("uni_code").setValue(codigo);
+                    scheduleRef.child("owner").setValue(codigo);
+                    userRef.child("name").setValue(name.substring(name.indexOf(",")+1,name.lastIndexOf(",")).replace("+"," "));
+                    //DatabaseReference mesajeRef = database.child(codigo);
+
+
                     try {
-                        Thread.sleep(800);
-                    } catch (InterruptedException e) {
+                        Schedule schedule = sendPost();
+
+                        //ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                        ObjectMapper mapper  = new ObjectMapper();
+                        mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+                        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+                        String json = ow.writeValueAsString(schedule);
+                        System.out.println(json);
+
+                        JSONObject obj=null;
+                        try {
+                            obj = new JSONObject(json);
+                            System.out.println("My App"+obj.toString());
+                        } catch (Throwable t) {
+                            System.out.println("My App"+"Could not parse malformed JSON: \"" + json + "\"");
+                        }
+
+
+                        Map<String, Object> map =jsonToMap(obj);
+                        userRef.child("schedule").setValue(map);
+                        scheduleRef.child("schedule").setValue(map);
+
+
+                        Intent i = new Intent(MainActivity.this,AddUserToGroup.class);
+                        i.putExtra("Codigo",codigo);
+                        startActivity(i);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
-
-                    if(userexistsw==false)
-                        parseSchedule(codigo, name);
-
-                    Intent i = new Intent(MainActivity.this,RecyclerActivity.class);
-                    i.putExtra("Codigo",codigo);
-                    startActivity(i);
                 }
 
             }
@@ -340,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
                 word=inputLine.substring(inputLine.lastIndexOf("\">")+2,inputLine.lastIndexOf("<"));
                 response.append("CURSO: "+word);
                 bloque.setCourseName(word);
-                //System.out.println("CURSO: "+word);
+                System.out.println("CURSO: "+word);
                 continue;
             }
 
@@ -352,7 +399,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 word=inputLine.substring(inputLine.indexOf(">")+1,inputLine.lastIndexOf("<")).replace("&nbsp;","D");
                 response.append(options[i]+word);
-                //System.out.println(options[i]+word);
+                System.out.println(options[i]+word);
 
                 switch (i){
                     case 0:
@@ -417,54 +464,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         return false;
-    }
-
-
-    public synchronized void parseSchedule (String codigo, String name){
-        System.out.println("-******** Holi ********-");
-        //Here we add student's schedule to Firebase, in case he wasn't.
-        DatabaseReference userRef = databaseInstance.getReference("users/" + codigo + "");
-        DatabaseReference scheduleRef = databaseInstance.getReference("schedules/" + codigo + "");
-
-        userRef.child("uni_code").setValue(codigo);
-        scheduleRef.child("owner").setValue(codigo);
-        userRef.child("name").setValue(name.substring(name.indexOf(",") + 1, name.lastIndexOf(",")).replace("+", " "));
-        //DatabaseReference mesajeRef = database.child(codigo);
-
-        Schedule schedule = null;
-
-        //Here we convert Schedule object into JsonObejct
-        try {
-            schedule = sendPost();
-
-            //ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-            ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(schedule);
-            System.out.println(json);
-
-            JSONObject obj = null;
-            try {
-                obj = new JSONObject(json);
-                System.out.println("My App" + obj.toString());
-            } catch (Throwable t) {
-                System.out.println("My App" + "Could not parse malformed JSON: \"" + json + "\"");
-            }
-
-            //jsonToMap translate JsonObject into a map that allow us to upload it to Firebase.
-            Map<String, Object> map = jsonToMap(obj);
-            userRef.child("schedule").setValue(map);
-            scheduleRef.child("schedule").setValue(map);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     //Convert object to JSON and JSON to map

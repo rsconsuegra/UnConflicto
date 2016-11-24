@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class RecyclerActivity extends AppCompatActivity {
 
@@ -15,6 +16,8 @@ public class RecyclerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recycler);
 
         Intent i = getIntent();
+        Schedule schedule = (Schedule) i.getSerializableExtra("Schedule");
         String codigo = i.getStringExtra("Codigo");
+        ButterKnife.bind(this);
     }
 }

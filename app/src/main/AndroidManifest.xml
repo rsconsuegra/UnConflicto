@@ -29,6 +29,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".RecyclerActivity"></activity>
+        <activity android:name=".AddUserToGroup"></activity>
     </application>
 
 </manifest>
