@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "474608889215-cp0me45qmo2kn3h21nfbkfc0ci04u1vq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.underpressureapps.unconflicto",
+            "certificate_hash": "7AC7568425962904806986CECE43814722CD817E"
+          }
+        },
+        {
+          "client_id": "474608889215-ipnl1dg1mhuq0l2g350ip357m0knci9g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.underpressureapps.unconflicto",
+            "certificate_hash": "60696A77E75F1069347C4D07B467252189D014FD"
+          }
+        },
+        {
           "client_id": "474608889215-jtqunbp1l0oo0njp8rer2l935e5pqruj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

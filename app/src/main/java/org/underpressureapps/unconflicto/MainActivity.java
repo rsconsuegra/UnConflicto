@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.apache.commons.io.IOUtils;
 import java.io.BufferedReader;
@@ -44,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
     //We're using ButterKnife library to avoid findviewbyid
 
 
-   // private DatabaseReference mDatabase;
+    public DatabaseReference codo = FirebaseDatabase.getInstance().getReference().getRoot();
+
 // ...
     //mDatabase = FirebaseDatabase.getInstance().getReference();
 
